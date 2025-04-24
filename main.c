@@ -63,6 +63,28 @@ void print_line(const char *text) {
     printf("║\n");
 }
 
+
+void print_box(const char *text) {
+    print_border_top();
+
+    char *copy = strdup(text);  
+    char *line = strtok(copy, "\n");
+
+    int lines_printed = 0;
+    while (line != NULL && lines_printed < SECONDARY_HEIGHT) {
+        print_line(line);
+        line = strtok(NULL, "\n");
+        lines_printed++;
+    }
+
+    for (; lines_printed < SECONDARY_HEIGHT; lines_printed++) {
+        print_line("");
+    }
+
+    print_border_bottom();
+    free(copy); 
+}
+
 void print_main_border() {
     for (int i = 0; i < MAIN_HEIGHT; i++) {
         print_line("");
@@ -76,6 +98,8 @@ void print_secondary_border() {
 }
 
 void print_title() {
+    system(CLEAR);
+    print_border_top();
     const char *text[] = {
         "                                                                                                  ",
         "                                                                                                  ",
@@ -111,7 +135,7 @@ void print_title() {
         "                                                                                                  ",
         "   From -> Lucas Werpp Franco                                      Thanks for playing my game :)  ",
         "                                                                                                  ",
-        "                                                                                                  "
+        "                  https://github.com/LucasWerppFranco/C-rpg-game/tree/main                        "
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);
@@ -122,6 +146,59 @@ void print_title() {
             print_line("");
         }
     }
+    print_border_bottom();
+}
+
+void print_story_1() {
+    system(CLEAR);
+    print_border_top();
+    const char *text[] = {
+      "     |    |                             \\  STORY  /                                              ",
+      "     | 1  |                              \\_______/                                               ",
+      "     |    |                                                                                       ",
+      "     | /\\ |                                                                                      ",
+      "     |/  \\|                                                                                      ",
+      "                                                                                                  ",
+      "                                                                                                  ",
+      "                                                         _______________________                  ",
+      "              ________________________-------------------                       `\\               ",
+      "             /:--__                                                              |                ",
+      "            ||< > |                                   ___________________________/                ",
+      "            | \\__/_________________-------------------                         |                 ",
+      "            |                                                                  |                  ",
+      "             |                       THE LORD OF THE RINGS                      |                 ",
+      "             |                                                                  |                 ",
+      "             |       Three Rings for the Elven-kings under the sky,             |                 ",
+      "              |        Seven for the Dwarf-lords in their halls of stone,        |                ",
+      "              |      Nine for Mortal Men doomed to die,                          |                ",
+      "              |        One for the Dark Lord on his dark throne                  |                ",
+      "              |      In the Land of Mordor where the Shadows lie.                 |               ",
+      "               |       One Ring to rule them all, One Ring to find them,          |               ",
+      "               |       One Ring to bring them all and in the darkness bind them   |               ",
+      "               |     In the Land of Mordor where the Shadows lie.                |                ",
+      "              |                                              ____________________|_               ",
+      "              |  ___________________-------------------------                      `\\            ",
+      "              |/`--_                                                                 |            ",
+      "              ||[ ]||                                            ___________________/             ",
+      "               \\===/___________________--------------------------                                ",
+      "                                                                                                  ",
+      "                                                                                                  ",
+      "                                                                                                  ",
+      "                                                                                                  ",
+      "                                                                                                  ",
+      "                                                                                                  ",
+      "                                                                                                  "
+    };
+
+    size_t lines = sizeof(text) / sizeof(text[0]);
+    for (size_t i = 0; i < MAIN_HEIGHT; i++) {
+        if (i < lines) {
+            print_line(text[i]);
+        } else {
+            print_line("");
+        }
+    }
+    print_border_bottom();
 }
 
 int main() {
@@ -129,28 +206,21 @@ int main() {
 
   char response[10];
 
-  system(CLEAR);
-  print_border_top();
   print_title();
-  print_border_bottom();
 
-  print_border_top();
-  print_line("Do you want to start the game? (y/n): ");
-  print_border_bottom();
+  print_box("Do you want to start the game? (y/n):");
   printf(": ");
 
   fgets(response, sizeof(response), stdin);
 
   if (response[0] == 'y' || response[0] == 'Y') {
-    system(CLEAR);
-    print_border_top();
-    print_main_border();
-    print_border_bottom();
+      int pages = 0;
+      char confirmation[0];
 
-    print_border_top();
-    print_line("Press F to go to the next page");
-    print_border_bottom();
-    printf(": ");
+      print_story_1();
+
+      print_box("Press (N) to go to the next page");
+      printf(": "); 
   }
     
     return 0;
