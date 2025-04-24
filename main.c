@@ -15,8 +15,10 @@
 #endif
 
 #define WIDTH 100
-#define MAIN_HEIGHT 35
-#define SECONDARY_HEIGHT 5
+#define MAIN_HEIGHT 40
+#define SECONDARY_HEIGHT 4
+
+int current_page = 1;
 
 int visual_width(const char *s) {
     int width = 0;
@@ -85,18 +87,6 @@ void print_box(const char *text) {
     free(copy); 
 }
 
-void print_main_border() {
-    for (int i = 0; i < MAIN_HEIGHT; i++) {
-        print_line("");
-    }
-}
-
-void print_secondary_border() {
-    for (int i = 0; i < SECONDARY_HEIGHT; i++) {
-        print_line("");
-    }
-}
-
 void print_title() {
     system(CLEAR);
     print_border_top();
@@ -149,49 +139,118 @@ void print_title() {
     print_border_bottom();
 }
 
+void print_page_header(const char *title) {
+    char buffer[WIDTH];
+
+    snprintf(buffer, sizeof(buffer), "     |    |                             \\  %s  /                                              ", title);
+    print_line(buffer);
+
+    snprintf(buffer, sizeof(buffer), "     | %d  |                              \\_______/                                               ", current_page);
+    print_line(buffer);
+
+    print_line("     |    |                                                                                       ");
+    print_line("     | /\\ |                                                                                      ");
+    print_line("     |/  \\|                                                                                      ");
+}
+
+
 void print_story_1() {
     system(CLEAR);
     print_border_top();
+
+    print_page_header("STORY");
+
     const char *text[] = {
-      "     |    |                             \\  STORY  /                                              ",
-      "     | 1  |                              \\_______/                                               ",
-      "     |    |                                                                                       ",
-      "     | /\\ |                                                                                      ",
-      "     |/  \\|                                                                                      ",
-      "                                                                                                  ",
-      "                                                                                                  ",
-      "                                                         _______________________                  ",
-      "              ________________________-------------------                       `\\               ",
-      "             /:--__                                                              |                ",
-      "            ||< > |                                   ___________________________/                ",
-      "            | \\__/_________________-------------------                         |                 ",
-      "            |                                                                  |                  ",
-      "             |                       THE LORD OF THE RINGS                      |                 ",
-      "             |                                                                  |                 ",
-      "             |       Three Rings for the Elven-kings under the sky,             |                 ",
-      "              |        Seven for the Dwarf-lords in their halls of stone,        |                ",
-      "              |      Nine for Mortal Men doomed to die,                          |                ",
-      "              |        One for the Dark Lord on his dark throne                  |                ",
-      "              |      In the Land of Mordor where the Shadows lie.                 |               ",
-      "               |       One Ring to rule them all, One Ring to find them,          |               ",
-      "               |       One Ring to bring them all and in the darkness bind them   |               ",
-      "               |     In the Land of Mordor where the Shadows lie.                |                ",
-      "              |                                              ____________________|_               ",
-      "              |  ___________________-------------------------                      `\\            ",
-      "              |/`--_                                                                 |            ",
-      "              ||[ ]||                                            ___________________/             ",
-      "               \\===/___________________--------------------------                                ",
-      "                                                                                                  ",
-      "                                                                                                  ",
-      "                                                                                                  ",
-      "                                                                                                  ",
-      "                                                                                                  ",
-      "                                                                                                  ",
-      "                                                                                                  "
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                         _______________________                  ",
+        "              ________________________-------------------                       `\\               ",
+        "             /:--__                                                              |                ",
+        "            ||< > |                                   ___________________________/                ",
+        "            | \\__/_________________-------------------                         |                 ",
+        "            |                                                                  |                  ",
+        "             |                       THE LORD OF THE RINGS                      |                 ",
+        "             |                                                                  |                 ",
+        "             |       Three Rings for the Elven-kings under the sky,             |                 ",
+        "              |        Seven for the Dwarf-lords in their halls of stone,        |                ",
+        "              |      Nine for Mortal Men doomed to die,                          |                ",
+        "              |        One for the Dark Lord on his dark throne                  |                ",
+        "              |      In the Land of Mordor where the Shadows lie.                 |               ",
+        "               |       One Ring to rule them all, One Ring to find them,          |               ",
+        "               |       One Ring to bring them all and in the darkness bind them   |               ",
+        "               |     In the Land of Mordor where the Shadows lie.                |                ",
+        "              |                                              ____________________|_               ",
+        "              |  ___________________-------------------------                      `\\            ",
+        "              |/`--_                                                                 |            ",
+        "              ||[ ]||                                            ___________________/             ",
+        "               \\===/___________________--------------------------                                ",
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  "
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);
-    for (size_t i = 0; i < MAIN_HEIGHT; i++) {
+    for (size_t i = 0; i < MAIN_HEIGHT - 5; i++) { 
+        if (i < lines) {
+            print_line(text[i]);
+        } else {
+            print_line("");
+        }
+    }
+
+    print_border_bottom();
+}
+
+void print_story_2() {
+    system(CLEAR);
+    print_border_top();
+
+    print_page_header("STORY");
+
+    const char *text[] = {
+      "                                                                                                  ",
+      "                                           /|                                                     ",
+      "                                          |||                                                     ",
+      "                                          |||                                                     ",
+      "                                          |||                                                     ",
+      "                                          |||                                                     ",
+      "                                          |||                                                     ",
+      "                                          |||                                                     ",
+      "                                          |||                                                     ",
+      "                                       ~-[{o}]-~                                                  ",
+      "                                          |/|                                                     ",
+      "                                          |/|                                                     ",
+      "                  ///~`     |\\\\\\\\_        `0'         =\\\\\\\\         . .                   ",
+      "                 ,  |='  ,))\\_| ~-_                    _)  \\      _/_/|                         ",
+      "                / ,' ,;((((((    ~ \\                  `~~~\\-~-_ /~ (_/\\                        ",
+      "              /' -~/~)))))))'\\_   _/'                      \\_  /'  D   |                        ",
+      "             (       (((((( ~-/ ~-/                          ~-;  /    \\--_                      ",
+      "              ~~--|   ))''    ')  `                            `~~\\_    \\   )                   ",
+      "                  :        (_  ~\\           ,                    /~~-     ./                     ",
+      "                   \\        \\_   )--__  /(_/)                   |    )    )|                    ",
+      "         ___       |_     \\__/~-__    ~~   ,'      /,_;,   __--(   _/      |                     ",
+      "       //~~\\`\\    /' ~~~----|     ~~~~~~~~'        \\-  ((~~    __-~        |                   ",
+      "     ((()   `\\`\\_(_     _-~~-\\                      ``~~ ~~~~~~   \\_      /                   ",
+      "      )))     ~----'   /      \\                                   )       )                      ",
+      "       (         ;`~--'        :                                _-    ,;;(                        ",
+      "                 |    `\\       |                             _-~    ,;;;;)                       ",
+      "                 |    /'`\\     ;                          _-~          _/                        ",
+      "                /~   /    |    )                         /;;;''  ,;;:-~                           ",
+      "               |    /     / | /                         |;;'   ,''                                ",
+      "               /   /     |  \\\\|                         |   ,;(                                 ",
+      "             _/  /'       \\  \\_)                   .---__\\_    \\,--._______                   ",
+      "            ( )|'         (~-_|                   (;;'  ;;;~~~/' `;;|  `;;;\\                     ",
+      "             ) `\\_         |-_;;--__               ~~~----__/'    /'_______/                     ",
+      "             `----'       (   `~--_ ~~~;;------------~~~~~ ;;;'_/'                                ",
+      "                     `~~~~~~~~'~~~-----....___;;;____---~~                                        "     
+    };
+
+    size_t lines = sizeof(text) / sizeof(text[0]);
+    for (size_t i = 0; i < MAIN_HEIGHT -5; i++) {
         if (i < lines) {
             print_line(text[i]);
         } else {
@@ -201,27 +260,117 @@ void print_story_1() {
     print_border_bottom();
 }
 
+void print_story_3() {
+  system(CLEAR);
+  print_border_top();
+  print_page_header("STORY");
+
+  const char *text[] = {
+    "                                                                                                  ",
+    "                    / \\                                                                          ",
+    "                   / | \\  Three Rings for the Elvin-Kings under the sky.                         ",
+    "                  /  |  \\ Seven for the DwarfLords in their halls of stone.                      ",
+    "                 |   |   |    Nine for the Mortal Men doomed to die.                              ",
+    "                 |   |   |    One for the Dark Lord on his dark throne.                           ",
+    "                 |   |   |In the Land of Mordor where the Shadow Lies.                            ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |  One Ring to rule them all,One Ring to find them,                      ",
+    "                 |   |   |One Ring to bring them all and in the Darkness                          ",
+    "                 |   |   |   Bind Them                                                            ",
+    "                 |   |   |  In the Land of Mordor where the Shadows Lie.                          ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |           This quote is from my Favorite Book                          ",
+    "                 |   |   |                       - Lord Of THe Rings -                            ",
+    "                 |   |   |                              by J.R.R. Tolkien                         ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |                                                                        ",
+    "                 |   |   |                      .____---^^     ^^---____.                         ",
+    "                 |   |   |                      TI      *       *      IT                         ",
+    "                 |   |   |                      !I          *          I!                         ",
+    "                 |  / \\  |                       X                     X                         ",
+    "/\\               |/     \\|               /\\      XL         ?         JX                       ",
+    "\\ \\_____________/         \\_____________/ /      II    ?   / \\   ?    II                      ",
+    " \\______________\\         /______________/       II   / \\ /   \\ / \\   II                     ",
+    "                 \\       /                        X  /   v     v   \\  X                         ",
+    "                 |\\\\   //|                        ``/    _     _    \\''                        ",
+    "                 |//\\ ///|                         \\\\- _-_ -_- _-_ -//                         ",
+    "                 |///////|                           \\\\_-  -_-  -_//                            ",
+    "                 |///////|                             ``       ''                                ",
+    "                 |///////|                               ``-_-''                                  ",
+    "                 |///////|                                                                        ",
+    "                 |///////|                                                                        ",
+    "                 |///////|                                                                        ",
+    "                / \\/\\_/\\/ \\                                                                   ",
+    "               |\\_/\\/ \\/\\_/|                                                                  ",
+    "               |/ \\/\\ /\\/ \\|                                                                  ",
+    "                \\_/\\/_\\/\\_/                                                                   ",
+    "                  \\_/_\\_/                                                                       "  
+  };
+
+size_t lines = sizeof(text) / sizeof(text[0]);
+    for (size_t i = 0; i < MAIN_HEIGHT -5; i++) {
+        if (i < lines) {
+            print_line(text[i]);
+        } else {
+            print_line("");
+        }
+    }
+    print_border_bottom();
+}
+
+void print_story_1();
+void print_story_2();
+void print_story_3();
+void print_title();
+
 int main() {
-  setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "");
 
-  char response[10];
+    char response[10];
+    print_title();
 
-  print_title();
+    print_box("press ENTER to start the game");
+    printf(": ");
+    fgets(response, sizeof(response), stdin);
 
-  print_box("Do you want to start the game? (y/n):");
-  printf(": ");
+    if (response[0] == '\n') {
+        current_page = 1;
+        char input[10];
 
-  fgets(response, sizeof(response), stdin);
+        while (1) {
+            switch (current_page) {
+                case 1:
+                    print_story_1();
+                    break;
+                case 2:
+                    print_story_2();
+                    break;
+                case 3:
+                    print_story_3();
+                    break;
+                default:
+                    print_box("End of story. Press (A) to go back or (Q) to quit.");
+                    break;
+            }
 
-  if (response[0] == 'y' || response[0] == 'Y') {
-      int pages = 0;
-      char confirmation[0];
+            print_box("Press (D) for next, (A) to return, or (S) to skip:");
+            printf(": ");
+            fgets(input, sizeof(input), stdin);
 
-      print_story_1();
+            if (input[0] == 'q' || input[0] == 'Q') {
+                break;
+            } else if ((input[0] == 'd' || input[0] == 'D') && current_page < 3) {
+                current_page++;
+            } else if ((input[0] == 'a' || input[0] == 'A') && current_page > 1) {
+                current_page--;
+            } else if (input[0] == 's' || input[0] == 'S') {
+                break;
+            }
+        }
+    }
 
-      print_box("Press (N) to go to the next page");
-      printf(": "); 
-  }
-    
     return 0;
-} 
+}
