@@ -27,3 +27,13 @@ This repository was created with the intention of improving my knowledge in C. F
 I created some libraries with the intention of not only adding to my project but also helping other Gnu/Lunux developers to carry out their projects. Feel free to check them out.
 
 - [Tusk](https://github.com/LucasWerppFranco/Tusk-C-library)
+
+---
+
+## Run whith Docker
+You can also use docker to run my game!
+
+```
+docker build -t rpg .
+docker run -it --rm rpg
+```
