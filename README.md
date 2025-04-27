@@ -35,6 +35,8 @@ You can also use docker to run my game!
 
 The only requirement to install the game this way is to have Docker installed on your computer. Click [Here](https://www.docker.com/get-started/) to install Docker.
 
+After installing, use this command to create a container and start the game inside it:
+
 ```
 docker build -t rpg .
 docker run -it --rm rpg
