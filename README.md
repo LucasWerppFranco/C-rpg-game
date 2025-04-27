@@ -32,7 +32,8 @@ I created some libraries with the intention of not only adding to my project but
 
 ## Run whith Docker
 You can also use docker to run my game!
-The only requirement to install the game this way is to have Docker installed. Click [Here](https://www.docker.com/get-started/) to install Docker.
+
+The only requirement to install the game this way is to have Docker installed on your computer. Click [Here](https://www.docker.com/get-started/) to install Docker.
 
 ```
 docker build -t rpg .
