@@ -53,3 +53,7 @@ dkms.conf
 
 # Test files
 test.c
+
+# Tusk Librarie
+tusk.c
+tusk.h
