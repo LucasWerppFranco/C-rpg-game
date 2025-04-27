@@ -136,7 +136,7 @@ void print_title() {
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);
-    for (size_t i = 0; i < MAIN_HEIGHT; i++) {
+    for (size_t i = 0; i < MAIN_HEIGHT -5; i++) {
         if (i < lines) {
             print_line(text[i]);
         } else {
@@ -200,7 +200,9 @@ void print_story_1() {
         "                                                                                                  ",
         "                                                                                                  ",
         "                                                                                                  ",
-        "                                              (teste)                                             "
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  "
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);

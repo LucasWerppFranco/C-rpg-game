@@ -9,14 +9,21 @@ RUN apt-get update && apt-get install -y \
     locales \
     git \
     sudo \
+    fonts-firacode \
+    xterm \
+    fonts-dejavu \
+    fonts-noto \
     && rm -rf /var/lib/apt/lists/*
 
-# Configuração de locais
+# Gerar as localidades corretamente
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+
+# Definir as variáveis de ambiente corretamente
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV TERM=xterm-256color
 
 # Diretório de trabalho
 WORKDIR /app
@@ -38,7 +45,16 @@ FROM debian:stable-slim
 # Instalar as dependências de execução
 RUN apt-get update && apt-get install -y \
     libc6 \
+    xterm \
+    fonts-firacode \
+    fonts-dejavu \
+    fonts-noto \
+    locales \
     && rm -rf /var/lib/apt/lists/*
+
+# Gerar as localidades
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
 
 # Copiar o binário compilado do estágio anterior
 COPY --from=build /app/main /app/main
@@ -47,10 +63,12 @@ COPY --from=build /app/main /app/main
 COPY --from=build /usr/local/lib/libtusk.so /usr/local/lib/
 RUN ldconfig
 
-# Definir a variável de ambiente para o caminho das bibliotecas
-ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+# Definir variáveis de ambiente para a codificação e configuração do terminal
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV TERM=xterm-256color
 
-# Definir diretório de trabalho
+# Definir o diretório de trabalho
 WORKDIR /app
 
 # Executar o programa
