@@ -7,6 +7,8 @@
 #include <wctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <time.h>
+#include "tusk.h"
 
 #ifdef _WIN32
     #define CLEAR "cls"
@@ -327,20 +329,26 @@ void print_story_3();
 void print_title();
 
 int main() {
-    setlocale(LC_ALL, "");
+  setlocale(LC_ALL, "");
 
-    char response[10];
-    print_title();
+  char response[10];
+  set_conio_terminal_mode();
+  print_title();
 
-    print_box("press ENTER to start the game");
-    printf(": ");
-    fgets(response, sizeof(response), stdin);
+  print_box("press ENTER to start the game");
+  fgets(response, sizeof(response), stdin);
 
-    if (response[0] == '\n') {
-        current_page = 1;
-        char input[10];
+  if (response[0] == '\n') {
+    current_page = 1;
+    char input[10];
 
-        while (1) {
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100000 * 1000;
+
+    while (1) {
+        if (kbhit()) {
+            char ch = getchar();
             switch (current_page) {
                 case 1:
                     print_story_1();
@@ -357,20 +365,22 @@ int main() {
             }
 
             print_box("Press (D) for next, (A) to return, or (S) to skip:");
-            printf(": ");
-            fgets(input, sizeof(input), stdin);
 
-            if (input[0] == 'q' || input[0] == 'Q') {
-                break;
-            } else if ((input[0] == 'd' || input[0] == 'D') && current_page < 3) {
-                current_page++;
-            } else if ((input[0] == 'a' || input[0] == 'A') && current_page > 1) {
-                current_page--;
-            } else if (input[0] == 's' || input[0] == 'S') {
-                break;
+            if (ch == 'q' || ch == 'Q') {
+                break; 
+            } else if ((ch == 'd' || ch == 'D') && current_page < 3) {
+                current_page++; 
+            } else if ((ch == 'a' || ch == 'A') && current_page > 1) {
+                current_page--; 
+            } else if (ch == 's' || ch == 'S') {
+                current_page = 1;
+                break; 
             }
         }
+        nanosleep(&ts, NULL); 
     }
+}
 
-    return 0;
+reset_terminal_mode(); 
+return 0;
 }
