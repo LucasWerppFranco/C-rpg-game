@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <time.h>
-#include "tusk.h"
+#include <tusk.h>
 
 #ifdef _WIN32
     #define CLEAR "cls"
@@ -95,6 +95,8 @@ void print_title() {
     const char *text[] = {
         "                                                                                                  ",
         "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  ",
         "                ▓█████▄  █    ██  ███▄    █   ▄████ ▓█████  ▒█████   ███▄    █                    ",
         "                ▒██▀ ██▌ ██  ▓██▒ ██ ▀█   █  ██▒ ▀█▒▓█   ▀ ▒██▒  ██▒ ██ ▀█   █                    ",
         "                ░██   █▌▓██  ▒██░▓██  ▀█ ██▒▒██░▄▄▄░▒███   ▒██░  ██▒▓██  ▀█ ██▒                   ",
@@ -124,6 +126,9 @@ void print_title() {
         "                          ░  ░      ░  ▒   ▒▒ ░  ░   ░  ░ ░  ░                                    ",
         "                          ░      ░     ░   ▒   ░ ░   ░    ░                                       ",
         "                                 ░         ░  ░      ░    ░  ░                                    ",
+        "                                                                                                  ",
+        "                                                                                                  ",
+        "                                                                                                  ",
         "                                                                                                  ",
         "   From -> Lucas Werpp Franco                                      Thanks for playing my game :)  ",
         "                                                                                                  ",
@@ -163,6 +168,9 @@ void print_story_1() {
     print_page_header("STORY");
 
     const char *text[] = {
+        "                                                                                                  ", 
+        "                                                                                                  ",
+        "                                                                                                  ",
         "                                                                                                  ",
         "                                                                                                  ",
         "                                                         _______________________                  ",
@@ -192,7 +200,7 @@ void print_story_1() {
         "                                                                                                  ",
         "                                                                                                  ",
         "                                                                                                  ",
-        "                                                                                                  "
+        "                                              (teste)                                             "
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);
