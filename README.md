@@ -35,9 +35,20 @@ You can also use docker to run my game!
 
 The only requirement to install the game this way is to have Docker installed on your computer. Click [Here](https://www.docker.com/get-started/) to install Docker.
 
-After installing, use this command to create a container and start the game inside it:
+---
+
+1 - Git clone the project to the desired folder:
+
+```
+git clone https://github.com/LucasWerppFranco/C-rpg-game.git
+cd C-rpg-game
+```
+
+2 - Create the system image and run the program:
 
 ```
 docker build -t rpg .
 docker run -it --rm rpg
 ```
+
+That's it! Now you can test my game without having to install anything else! Enjoy! ;)
