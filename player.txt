@@ -1,0 +1,4 @@
+Nome: Jogador
+Vida: 100
+Dificuldade de Acerto: 3
+Ataque: 2-12

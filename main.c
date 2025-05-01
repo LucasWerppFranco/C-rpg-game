@@ -22,6 +22,83 @@
 
 int current_page = 1;
 
+
+// Functions
+
+int visual_width(const char *s);
+void print_border_top();
+void print_border_bottom();
+void print_line(const char *text);
+void print_box(const char *text);
+void print_title();
+void print_page_header(const char *title);
+void print_story_1();
+void print_story_2();
+void print_story_3();
+
+
+// Main Functions
+
+int main() {
+  setlocale(LC_ALL, "");
+
+  char response[10];
+  set_conio_terminal_mode();
+  print_title();
+
+  print_box("press ENTER to start the game");
+  fgets(response, sizeof(response), stdin);
+
+  if (response[0] == '\n') {
+    current_page = 1;
+    char input[10];
+
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100000 * 1000;
+
+    while (1) {
+        if (kbhit()) {
+            char ch = getchar();
+            switch (current_page) {
+                case 1:
+                    print_story_1();
+                    break;
+                case 2:
+                    print_story_2();
+                    break;
+                case 3:
+                    print_story_3();
+                    break;
+                default:
+                    print_box("End of story. Press (A) to go back or (Q) to quit.");
+                    break;
+            }
+
+            print_box(" \nPress (D) for next, (A) to return, or (S) to skip:");
+
+            if (ch == 'q' || ch == 'Q') {
+                break; 
+            } else if ((ch == 'd' || ch == 'D') && current_page < 3) {
+                current_page++; 
+            } else if ((ch == 'a' || ch == 'A') && current_page > 1) {
+                current_page--; 
+            } else if (ch == 's' || ch == 'S') {
+                current_page = 1;
+                break; 
+            }
+        }
+        nanosleep(&ts, NULL); 
+    }
+}
+
+reset_terminal_mode(); 
+return 0;
+}
+
+
+// Structure
+
 int visual_width(const char *s) {
     int width = 0;
     wchar_t wc;
@@ -136,7 +213,7 @@ void print_title() {
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);
-    for (size_t i = 0; i < MAIN_HEIGHT -5; i++) {
+    for (size_t i = 0; i < MAIN_HEIGHT; i++) {
         if (i < lines) {
             print_line(text[i]);
         } else {
@@ -333,64 +410,6 @@ size_t lines = sizeof(text) / sizeof(text[0]);
     print_border_bottom();
 }
 
-void print_story_1();
-void print_story_2();
-void print_story_3();
-void print_title();
+// COMBAT SYSTEM
 
-int main() {
-  setlocale(LC_ALL, "");
 
-  char response[10];
-  set_conio_terminal_mode();
-  print_title();
-
-  print_box("press ENTER to start the game");
-  fgets(response, sizeof(response), stdin);
-
-  if (response[0] == '\n') {
-    current_page = 1;
-    char input[10];
-
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 100000 * 1000;
-
-    while (1) {
-        if (kbhit()) {
-            char ch = getchar();
-            switch (current_page) {
-                case 1:
-                    print_story_1();
-                    break;
-                case 2:
-                    print_story_2();
-                    break;
-                case 3:
-                    print_story_3();
-                    break;
-                default:
-                    print_box("End of story. Press (A) to go back or (Q) to quit.");
-                    break;
-            }
-
-            print_box("Press (D) for next, (A) to return, or (S) to skip:");
-
-            if (ch == 'q' || ch == 'Q') {
-                break; 
-            } else if ((ch == 'd' || ch == 'D') && current_page < 3) {
-                current_page++; 
-            } else if ((ch == 'a' || ch == 'A') && current_page > 1) {
-                current_page--; 
-            } else if (ch == 's' || ch == 'S') {
-                current_page = 1;
-                break; 
-            }
-        }
-        nanosleep(&ts, NULL); 
-    }
-}
-
-reset_terminal_mode(); 
-return 0;
-}

@@ -1,0 +1,4 @@
+Nome: Goblin
+Vida: 20
+Dificuldade de Acerto: 3
+Ataque: 1-6

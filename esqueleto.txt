@@ -1,0 +1,4 @@
+Nome: Esqueleto
+Vida: 40
+Dificuldade de Acerto: 3
+Ataque: 1-6
