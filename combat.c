@@ -87,8 +87,13 @@ void start_combat(const char *enemy_file) {
     Character player;
     Character enemy;
 
-    load_character("player.txt", &player);
-    load_character(enemy_file, &enemy);
+    load_character("char/player.txt", &player);
+    
+    // Monta o caminho completo para o inimigo, concatenando o diretório com o nome do arquivo
+    char enemy_path[256];
+    snprintf(enemy_path, sizeof(enemy_path), "char/%s", enemy_file);
+    
+    load_character(enemy_path, &enemy);
 
     printf("Iniciando combate entre %s e %s!\n", player.name, enemy.name);
 
