@@ -31,7 +31,9 @@ int main() {
     start_combat("goblin.txt");
 
     // Inicia o combate com o esqueleto
-    // start_combat("esqueleto.txt");
+    start_combat("esqueleto.txt");
+
+    start_combat("Elmer.txt");
 
     return 0;
 }
