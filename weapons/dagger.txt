@@ -1,0 +1,23 @@
+Nome: Dagger
+Slots: 1
+Tipo: Leve, Arremessável
+Descrição: "Uma lamina pequena e leve, ideal para ataques rápidos e precisos. Possue uma lâmina de aço afiada, uma ponta estreita e um cabo de madeira simples envolto por tiras de couro para melhor empunhadura. Utilizada tanto como arma de combate quanto ferramenta utilitária, é comum entre viajantes, ladrões e soldados."
+
+Ataque 1
+
+Nome: Cortar
+Slot: 1-2
+Atributo: AGI
+Tipo de Dano: Cortante
+Efeito: Sangramento
+Dado: 󱅐
+Dano: 1-4 + AGI
+
+Ataque 2
+
+Nome: Perfurar
+Slot: 1-2
+Atributo: AGI
+Tipo de Dano: Perfurante
+Dado: 󱅐
+Dano: 1-4 + AGI

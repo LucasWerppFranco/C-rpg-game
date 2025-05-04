@@ -1,0 +1,36 @@
+Nome: 
+Tipo: Humanoide
+Tamanho: Médio
+Vida: 20 + VIG * 5
+
+FOR: 
+AGI: 
+VIG: 
+INT: 
+CAR: 
+POD: 
+
+Resistências:
+Imunidades:
+Fraquezas:
+
+Condiçoes:
+Imunidade a Condoiçoes:
+
+AC: AGI * 10
+
+Slot 1:
+Slot 2:
+Slot 3:
+
+Habilidades:
+
+Ataque 1
+
+Nome: Agredir
+Slot: 1-2
+Atributo: Força
+Tipo de Dano: Contundente
+Dado: 
+Dano: 1 + For
+

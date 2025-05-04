@@ -1,0 +1,23 @@
+Nome: Maça
+Tipo: Versatil, Pesada
+Slots: 1
+Descrição: ""
+
+Ataque 1
+
+Nome: Esmagar
+Slot: 1-2
+Atributo: FOR
+Tipo de Dano: Contundente
+Dado: 󱅒
+Dano: 1-8 + FOR
+
+Ataque 2
+
+Nome: Esmagar (Duas Mãos)
+Slot: 3
+Atributo: FOR
+Tipo de Dano: Contundente
+Efeito: Confusão
+Dado: 󱅓
+Dano: 1-10 + FOR

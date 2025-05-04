@@ -1,0 +1,16 @@
+Nome: Besta
+Slot: 1
+Tipo: Recarga, Alcance
+Descrição: "Compacta e robusta, esta besta de madeira reforçada com ferragens é projetada para ser eficiente sem sacrificar mobilidade. Possui um arco curto e poderoso montado sobre um corpo com ranhura para o virote, e uma manivela ou alavanca simples para recarga. Ideal para combates em espaços fechados ou para soldados que precisam de uma arma confiável à média distância, é comum entre mercenários e guardas urbanos."
+
+Ataque 1
+
+Nome: Alvejar
+Slot: 1-2
+Munição Utilizada: Virote
+Quantidade 1
+Atributo: AGI
+Tipo de Dano: Perfurante
+Dado: 󱅓
+Dano: 1-10 + AGI
+

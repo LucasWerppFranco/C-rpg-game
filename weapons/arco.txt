@@ -1,0 +1,29 @@
+Nome: Arco Longo
+Tipo: Alcance
+Slots: 3
+Descrição: "Um arco de grande porte feito com madeira flexível, como teixo ou carvalho curado, cuidadosamente entalhado para garantir equilíbrio e alcance. A corda é feita de tendões trançados ou fibras vegetais resistentes, tensionada para exigir força e técnica de quem o empunha. Este tipo de arco é preferido por caçadores habilidosos e arqueiros de guerra, pois permite disparos potentes a longas distâncias."
+
+Ataque 1
+
+Nome: Alvejar
+Slot: 3
+Munição Utilizada: Flecha
+Quantidade 1
+Atributo: AGI
+Tipo de Dano: Perfurante
+Dado: 󱅑
+Dano: 1-6 + AGI
+
+Propriedade 1:
+
+Nome: Disparo Duplo
+Slot: 3
+Ação: Alvejar * 2
+Energia: -1
+
+Propriedade 2:
+
+Nome: Disparo Triplo
+Slot: 3
+Ação: Alvejar * 3
+Energia: -2
