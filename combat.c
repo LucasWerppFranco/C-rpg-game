@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
 #include <unistd.h>  // Para usar a função sleep
 #include <stdbool.h> // Para usar bool
 #include <dirent.h>  // Para manipular diretórios
@@ -10,61 +9,71 @@
 #define MAX_HEALTH 50
 #define HEALTH_BAR_WIDTH 20
 
-// Estrutura para armazenar as características do personagem
+// Estrutura para armazenar os ataques da arma
 typedef struct {
-    char name[20];
-    char type[20];          // Ex: Humanoide
-    int size;               // Ex: Médio
-    int health;             // Vida total
-    int vigor;
-    int strength;           // FOR
-    int agility;            // AGI
-    int intelligence;       // INT
-    int charisma;           // CAR
-    int power;              // POD
-    int armor_class;        // AC calculada
-    char resistances[100];  // Lista de resistências
-    char immunities[100];   // Lista de imunidades
-    char conditions[100];   // Condições atuais
-    char immunity_conditions[100]; // Imunidade a condições
-    char slots[3][30];      // Equipamento: slot 0 = mão esquerda, slot 1 = mão direita, slot 2 = duas mãos
-    char abilities[100];    // Habilidades
-} Character;
+    char name[20];          // Nome do ataque
+    char slot[10];          // Slot necessário para usar o ataque
+    char attribute[10];     // Atributo que influencia o ataque
+    char damage_type[20];   // Tipo de dano
+    char ammo_used[20];     // Munição utilizada (se aplicável)
+    int ammo_quantity;      // Quantidade de munição utilizada
+    char die[10];           // Dado de dano (ex: 1d6)
+    int base_damage;        // Dano base
+} Attack;
 
 // Estrutura para armazenar as características da arma
 typedef struct {
     char name[20];
-    char type[20];          // leve, pesada, curto alcance, longo alcance, etc.
-    char damage_type[20];   // Perfurante, Cortante, Contundente
-    char attribute[20];     // Força, Destreza
-    int main_attack;
-    int secondary_attack;   // 0 se não houver
+    char type[20];          // Tipo da arma
+    char slot[10];          // Slot onde deve ser equipada
+    char description[256];  // Descrição da arma
+    Attack attacks[4];      // Até 4 ataques
+    int attack_count;       // Número de ataques
 } Weapon;
 
-// Protótipos de funções
+// Estrutura para armazenar as características do personagem
+typedef struct {
+    char name[20];
+    char type[20];
+    int size;
+    int health;
+    int vigor;
+    int strength;
+    int agility;
+    int intelligence;
+    int charisma;
+    int power;
+    int armor_class;
+    char resistances[100];
+    char immunities[100];
+    char conditions[100];
+    char immunity_conditions[100];
+    char slots[3][30];      // Equipamentos slots 1, 2 e 3
+    char abilities[100];
+} Character;
+
+// Protótipos das funções
 void print_health_bar(int health, int max_health);
 void update_health(int *health, int change);
 void load_character(const char *filename, Character *character);
 void load_weapon(const char *filename, Weapon *weapon);
 void start_combat(const char *enemy_file);
-int calculate_attack_damage(Character *character, Weapon *weapon, int attack_type); // 1 principal, 2 secundário
+int calculate_attack_damage(Character *character, Weapon *weapon, int attack_index);
 bool is_two_handed_slot_blocked(const Character *character);
 bool are_one_handed_slots_blocked(const Character *character);
 int inventory_select_weapon(char *selected_weapon_name, size_t name_size);
 
 int main() {
-    srand(time(NULL)); // Inicializa o gerador de números aleatórios
+    srand(time(NULL));
 
-    // Inventory - escolhe arma
     char weapon_filename[256];
     if (inventory_select_weapon(weapon_filename, sizeof(weapon_filename)) == 0) {
         printf("Você escolheu a arma: %s\n", weapon_filename);
-        // Aqui poderia atualizar a slot do jogador antes de começar combate
+        // Para exemplo simples, você pode adicionar a arma escolhida a slot 0 do player em seu arquivo character_sheet.txt
     } else {
         printf("Nenhuma arma disponível para equipar.\n");
     }
 
-    // Ajuste conforme desejar para passar a arma escolhida ao carregar personagem
     start_combat("goblin.txt");
 
     return 0;
@@ -80,14 +89,13 @@ void load_character(const char *filename, Character *character) {
     fscanf(file, "Nome: %s\n", character->name);
     fscanf(file, "Tipo: %s\n", character->type);
     fscanf(file, "Tamanho: %d\n", &character->size);
-    int vida_base=0, vigor=0;
-    fscanf(file, "Vida: %d + %d\n", &vida_base, &vigor);
-    character->vigor = vigor;
-    character->health = vida_base + vigor; // Vida total
+    int vida_base = 0;
+    fscanf(file, "Vida: %d + %d\n", &vida_base, &character->vigor);
+    character->health = vida_base + character->vigor;
 
     fscanf(file, "FOR: %d\n", &character->strength);
     fscanf(file, "AGI: %d\n", &character->agility);
-    fscanf(file, "VIG: %d\n", &character->vigor);  // Atualiza vigor direto
+    fscanf(file, "VIG: %d\n", &character->vigor);
     fscanf(file, "INT: %d\n", &character->intelligence);
     fscanf(file, "CAR: %d\n", &character->charisma);
     fscanf(file, "POD: %d\n", &character->power);
@@ -99,7 +107,6 @@ void load_character(const char *filename, Character *character) {
 
     character->armor_class = character->agility * 10;
 
-    // Lê slots de equipamentos
     for (int i = 0; i < 3; i++) {
         fscanf(file, "Slot %d: %[^\n]\n", &i, character->slots[i]);
     }
@@ -117,11 +124,36 @@ void load_weapon(const char *filename, Weapon *weapon) {
     }
 
     fscanf(file, "Nome: %s\n", weapon->name);
+    fscanf(file, "Slots: %s\n", weapon->slot);
     fscanf(file, "Tipo: %s\n", weapon->type);
-    fscanf(file, "Tipo de Dano: %s\n", weapon->damage_type);
-    fscanf(file, "Atributo: %s\n", weapon->attribute);
-    fscanf(file, "Ataque Principal: %d\n", &weapon->main_attack);
-    fscanf(file, "Ataque Secundário: %d\n", &weapon->secondary_attack);
+    fscanf(file, "Descrição: %[^\n]\n", weapon->description);
+
+    weapon->attack_count = 0;
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        if (strncmp(line, "Ataque", 6) == 0 && weapon->attack_count < 4) {
+            Attack *attack = &weapon->attacks[weapon->attack_count];
+
+            fscanf(file, "Nome: %s\n", attack->name);
+            fscanf(file, "Slot: %s\n", attack->slot);
+            fscanf(file, "Atributo: %s\n", attack->attribute);
+            fscanf(file, "Tipo de Dano: %s\n", attack->damage_type);
+
+            // Alguns ataques podem não ter munição, então tenta ler, mas é opcional
+            if(fgets(line, sizeof(line), file) && strncmp(line, "Munição Utilizada:", 17) == 0) {
+                sscanf(line, "Munição Utilizada: %s\n", attack->ammo_used);
+                fscanf(file, "Quantidade %d\n", &attack->ammo_quantity);
+            } else {
+                attack->ammo_used[0] = '\0';
+                attack->ammo_quantity = 0;
+            }
+
+            fscanf(file, "Dado: %s\n", attack->die);
+            fscanf(file, "Dano: %d\n", &attack->base_damage);
+
+            weapon->attack_count++;
+        }
+    }
 
     fclose(file);
 }
@@ -160,23 +192,22 @@ bool are_one_handed_slots_blocked(const Character *character) {
     return strlen(character->slots[2]) > 0;
 }
 
-int calculate_attack_damage(Character *character, Weapon *weapon, int attack_type) {
-    int base_attack = 0;
-    if (attack_type == 1) {
-        base_attack = weapon->main_attack;
-    } else if (attack_type == 2 && weapon->secondary_attack > 0) {
-        base_attack = weapon->secondary_attack;
-    } else {
-        return 0;
-    }
-    int attribute_bonus = 0;
-    if (strcmp(weapon->attribute, "Força") == 0) {
-        attribute_bonus = character->strength;
-    } else if (strcmp(weapon->attribute, "Destreza") == 0) {
-        attribute_bonus = character->agility;
-    }
+int calculate_attack_damage(Character *character, Weapon *weapon, int attack_index) {
+    if (attack_index >= weapon->attack_count) return 0;
+
+    Attack *attack = &weapon->attacks[attack_index];
+    int base_damage = attack->base_damage;
+
+    int attribute_value = 0;
+    if (strcmp(attack->attribute, "FOR") == 0 || strcmp(attack->attribute, "Força") == 0)
+        attribute_value = character->strength;
+    else if (strcmp(attack->attribute, "AGI") == 0 || strcmp(attack->attribute, "Destreza") == 0)
+        attribute_value = character->agility;
+    else if(strcmp(attack->attribute, "VIG") == 0)
+        attribute_value = character->vigor;
+
     int variation = rand() % 3;
-    return base_attack + attribute_bonus + variation;
+    return base_damage + attribute_value + variation;
 }
 
 int inventory_select_weapon(char *selected_weapon_name, size_t name_size) {
@@ -290,26 +321,28 @@ void start_combat(const char *enemy_file) {
 
         if (!are_one_handed_slots_blocked(&player)) {
             printf("\nSua vez! Escolha o ataque:\n");
-            for (int i = 0; i < 2; i++) {
-                if (strlen(player.slots[i]) > 0)
-                    printf("%d - Ataque com %s\n", i + 1, player_weapon[i].name);
-                else
-                    printf("%d - Mão %d vazia\n", i + 1, i + 1);
+            for (int i = 0; i < player_weapon->attack_count; i++) {
+                printf("%d - %s\n", i + 1, player_weapon[0].attacks[i].name);
             }
             int escolha;
             scanf("%d", &escolha);
-            escolha = (escolha >= 1 && escolha <= 2) ? escolha - 1 : 0;
-            if (strlen(player.slots[escolha]) == 0) {
-                printf("Mão vazia, ataque nulo.\n");
-            } else {
-                int damage = calculate_attack_damage(&player, &player_weapon[escolha], 1);
-                printf("%s ataca %s com %s e causa %d de dano!\n", player.name, enemy.name, player_weapon[escolha].name, damage);
-                update_health(&enemy.health, -damage);
-            }
+            escolha = (escolha >= 1 && escolha <= player_weapon[0].attack_count) ? escolha - 1 : 0;
+            int damage = calculate_attack_damage(&player, &player_weapon[0], escolha);
+            printf("%s ataca %s com %s e causa %d de dano!\n",
+                    player.name, enemy.name, player_weapon[0].attacks[escolha].name, damage);
+            update_health(&enemy.health, -damage);
         } else if (!is_two_handed_slot_blocked(&player)) {
             if (strlen(player.slots[2]) > 0) {
-                int damage = calculate_attack_damage(&player, &player_weapon[2], 1);
-                printf("%s ataca %s com %s (duas mãos) e causa %d de dano!\n", player.name, enemy.name, player_weapon[2].name, damage);
+                printf("\nSua vez! Use ataque do slot 3 (duas mãos):\n");
+                for (int i = 0; i < player_weapon[2].attack_count; i++) {
+                    printf("%d - %s\n", i + 1, player_weapon[2].attacks[i].name);
+                }
+                int escolha;
+                scanf("%d", &escolha);
+                escolha = (escolha >= 1 && escolha <= player_weapon[2].attack_count) ? escolha - 1 : 0;
+                int damage = calculate_attack_damage(&player, &player_weapon[2], escolha);
+                printf("%s ataca %s com %s (duas mãos) e causa %d de dano!\n",
+                        player.name, enemy.name, player_weapon[2].attacks[escolha].name, damage);
                 update_health(&enemy.health, -damage);
             } else {
                 printf("Você está sem arma para atacar!\n");
@@ -324,27 +357,24 @@ void start_combat(const char *enemy_file) {
 
         sleep(2);
 
+        // Ataque do inimigo simplificado: sempre usa ataque principal do slot 0 se existir
         if (!are_one_handed_slots_blocked(&enemy)) {
-            int possiveis[2];
-            int count = 0;
-            for (int i = 0; i < 2; i++) {
-                if (strlen(enemy.slots[i]) > 0) possiveis[count++] = i;
-            }
-            if (count > 0) {
-                int escolha = possiveis[rand() % count];
-                int damage = calculate_attack_damage(&enemy, &enemy_weapon[escolha], 1);
-                printf("%s ataca %s com %s e causa %d de dano!\n", enemy.name, player.name, enemy_weapon[escolha].name, damage);
+            if (enemy_weapon[0].attack_count > 0) {
+                int damage = calculate_attack_damage(&enemy, &enemy_weapon[0], 0);
+                printf("%s ataca %s com %s e causa %d de dano!\n",
+                        enemy.name, player.name, enemy_weapon[0].attacks[0].name, damage);
                 update_health(&player.health, -damage);
             } else {
-                printf("%s está sem armas para atacar!\n", enemy.name);
+                printf("%s não tem ataques disponíveis.\n", enemy.name);
             }
         } else if (!is_two_handed_slot_blocked(&enemy)) {
-            if (strlen(enemy.slots[2]) > 0) {
-                int damage = calculate_attack_damage(&enemy, &enemy_weapon[2], 1);
-                printf("%s ataca %s com %s (duas mãos) e causa %d de dano!\n", enemy.name, player.name, enemy_weapon[2].name, damage);
+            if (enemy_weapon[2].attack_count > 0) {
+                int damage = calculate_attack_damage(&enemy, &enemy_weapon[2], 0);
+                printf("%s ataca %s com %s (duas mãos) e causa %d de dano!\n",
+                        enemy.name, player.name, enemy_weapon[2].attacks[0].name, damage);
                 update_health(&player.health, -damage);
             } else {
-                printf("%s está sem armas para atacar!\n", enemy.name);
+                printf("%s não tem ataques disponíveis.\n", enemy.name);
             }
         } else {
             printf("%s não pode atacar devido a slots ocupados!\n", enemy.name);
@@ -353,6 +383,7 @@ void start_combat(const char *enemy_file) {
             printf("%s foi derrotado!\n", player.name);
             break;
         }
+
         sleep(2);
     }
 }
