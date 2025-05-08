@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <time.h>
 #include <tusk.h>
+#include "data.h"
 
 #ifdef _WIN32
     #define CLEAR "cls"
