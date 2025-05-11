@@ -7,6 +7,28 @@
 
 #define HEALTH_BAR_WIDTH 20
 
+// FUNCTIONS
+
+void print_health_bar(int health, int max_health);
+void update_health(int *health, int change);
+int get_attribute(const Character *character, int attribute_index);
+int calculate_attack_damage(const Character *character, int attack_index);
+void start_combat(Character player, Character enemy);
+
+// MAIN
+
+int main() {
+    srand(time(NULL));
+    Character player = player_character;
+    Character enemy = goblin_monster;
+    printf("---------------[End]---------------");
+
+    start_combat(player, enemy);
+    return 0;
+}
+
+// COMBAT
+
 void print_health_bar(int health, int max_health) {
     int filled_blocks = (health * HEALTH_BAR_WIDTH) / max_health;
 
@@ -36,7 +58,7 @@ int calculate_attack_damage(const Character *character, int attack_index) {
 
     Attack attack = character->attacks[attack_index];
     int attribute_value = get_attribute(character, attack.attribute);
-    int variation = (rand() % 3) - 1; // -1, 0 ou +1
+    int variation = (rand() % 3) - 1; 
 
     return attack.damage + attribute_value + variation;
 }
@@ -55,7 +77,6 @@ void start_combat(Character player, Character enemy) {
         printf("%s:\n", enemy.name);
         print_health_bar(enemy.health, max_enemy_health);
 
-        // Turno do jogador
         printf("\nSua vez! Escolha o ataque:\n");
         for (int i = 0; i < player.attack_count; i++) {
             printf("%d - %s\n", i + 1, player.attacks[i].name);
@@ -77,7 +98,6 @@ void start_combat(Character player, Character enemy) {
 
         sleep(1);
 
-        // Turno do inimigo
         int enemy_attack_index = rand() % enemy.attack_count;
         int enemy_damage = calculate_attack_damage(&enemy, enemy_attack_index);
         printf("%s ataca %s com %s e causa %d de dano!\n",
@@ -91,14 +111,4 @@ void start_combat(Character player, Character enemy) {
 
         sleep(1);
     }
-}
-
-int main() {
-    srand(time(NULL));
-    Character player = player_character;
-    Character enemy = goblin_monster;
-    printf("---------------[End]---------------");
-
-    start_combat(player, enemy);
-    return 0;
 }
