@@ -21,9 +21,10 @@ int main() {
     srand(time(NULL));
     Character player = player_character;
     Character enemy = goblin_monster;
-    printf("---------------[End]---------------");
 
     start_combat(player, enemy);
+
+    printf("---------------[End]---------------");
     return 0;
 }
 
