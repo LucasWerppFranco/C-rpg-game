@@ -563,6 +563,7 @@ void move_player(char* direction, const MapConfig* map_config) {
         for (int j = 0; j < columns; j++) {
             if (strcmp(map[i][j].content, "@") == 0) {
                 x = i;
+        print_border_bottom();
                 y = j;
                 break;
             }
