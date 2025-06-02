@@ -7,6 +7,8 @@
 #include <wctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <pthread.h>
+#include <unistd.h>
 #include <time.h>
 #include <tusk.h>
 #include "data.h"
@@ -36,6 +38,11 @@ typedef struct {
     const char* file_name;
 } MapConfig;
 
+pthread_t enemy_thread;
+
+volatile int redraw_needed = 0;
+
+int game_running = 1;
 int current_page = 1;
 
 
@@ -47,6 +54,8 @@ int visual_width(const char *s);
 void print_border_top();
 void print_border_bottom();
 void print_line(const char *text);
+void print_line_center(const char *text);
+void print_line_right(const char *text);
 void print_instructions(int current_page);
 void print_box(const char *text);
 void print_title();
@@ -59,6 +68,8 @@ void load_map(const MapConfig* map_config);
 void show_map(const MapConfig* map_config);
 int should_exit(char command);
 void move_player(char* direction, const MapConfig* map_config);
+void* enemy_ai_thread(void* arg);
+void move_all_enemies();
 void capture_input(char* direction);
 
 
@@ -67,7 +78,7 @@ void capture_input(char* direction);
 
 int main() {
     setlocale(LC_ALL, "");
-    setbuf(stdout, NULL); 
+    setbuf(stdout, NULL);
 
     char response[10];
     set_conio_terminal_mode();
@@ -97,19 +108,30 @@ int main() {
 
     MapConfig map1 = {
         .map_name = "Map 1",
-        .intro_text = "Catacombs",
+        .intro_text = "Abaddon's Catacombs",
         .color_code = "yellow",
         .file_name = "map.txt"
     };
 
     load_map(&map1);
 
+    pthread_create(&enemy_thread, NULL, enemy_ai_thread, NULL);
+
     char direction[10];
+
+    redraw_needed = 1;
+
     do {
-        show_map(&map1);
+        if (redraw_needed) {
+            show_map(&map1);
+            redraw_needed = 0;
+        }
+
         capture_input(direction);
 
         if (should_exit(direction[0])) {
+            game_running = 0;
+            pthread_join(enemy_thread, NULL);
             clear_memory();
             reset_terminal_mode();
             return 0;
@@ -118,6 +140,9 @@ int main() {
         move_player(direction, &map1);
 
     } while (1);
+
+    game_running = 0;
+    pthread_join(enemy_thread, NULL);
 
     clear_memory();
     reset_terminal_mode();
@@ -180,6 +205,41 @@ void print_line(const char *text) {
     printf("║\n");
 }
 
+void print_line_center(const char *text) {
+    printf("║");
+
+    int content_width = visual_width(text);
+    int total_padding = WIDTH - 2 - content_width;
+    int left_padding = total_padding / 2;
+    int right_padding = total_padding - left_padding;
+
+    for (int j = 0; j < left_padding; j++) {
+        printf(" ");
+    }
+
+    printf("%s", text);
+
+    for (int j = 0; j < right_padding; j++) {
+        printf(" ");
+    }
+
+    printf("║\n");
+}
+
+void print_line_right(const char *text) {
+    printf("║");
+
+    int content_width = visual_width(text);
+    int left_padding = WIDTH - 2 - content_width;
+
+    for (int j = 0; j < left_padding; j++) {
+        printf(" ");
+    }
+
+    printf("%s", text);
+
+    printf("║\n");
+}
 
 void print_instructions(int current_page) {
     char instrucao[100];
@@ -520,32 +580,30 @@ void show_map(const MapConfig* map_config) {
     system(CLEAR);
     print_border_top();
 
-    print_line(map_config->intro_text);
+    print_line_center(map_config->intro_text);  
 
     for (int i = 0; i < lines; i++) {
-        printf("║");  // borda esquerda
+        char buffer[WIDTH * 2]; 
+        int k = 0;
 
         for (int j = 0; j < columns; j++) {
             if (strcmp(map_config->color_code, "yellow") == 0 && strcmp(map[i][j].content, "@") == 0) {
-                printf("\033[33m%s\033[0m", map[i][j].content);  // imprime com cor
+                k += snprintf(buffer + k, sizeof(buffer) - k, "\033[33m%s\033[0m", map[i][j].content);
             } else {
-                printf("%s", map[i][j].content);
+                k += snprintf(buffer + k, sizeof(buffer) - k, "%s", map[i][j].content);
             }
         }
 
-        int visual_length = columns;  
-        for (int k = visual_length; k < WIDTH - 2; k++) {
-            printf(" ");
-        }
+        buffer[k] = '\0';
 
-        printf("║\n");  
+        print_line_center(buffer);  
     }
 
     print_border_bottom();
 
-    print_box("Comands:\n"
-              "w/a/s/d or arrows to move\n"
-              "Q to exit");
+    print_box("Comandos:\n"
+              "w/a/s/d ou setas para mover\n"
+              "q para sair");
 }
 
 int should_exit(char command) {
@@ -555,6 +613,7 @@ int should_exit(char command) {
 void move_player(char* direction, const MapConfig* map_config) {
     int x = -1, y = -1;
 
+    // encontra jogador
     for (int i = 0; i < lines && x == -1; i++) {
         for (int j = 0; j < columns; j++) {
             if (strcmp(map[i][j].content, "") == 0) {
@@ -566,14 +625,15 @@ void move_player(char* direction, const MapConfig* map_config) {
     }
 
     int dx = 0, dy = 0;
+
     if (strcmp(direction, "w") == 0 || strcmp(direction, "^[[A") == 0) {
         dx = -1;
     } else if (strcmp(direction, "s") == 0 || strcmp(direction, "^[[B") == 0) {
-        dx = +1;
+        dx = 1;
     } else if (strcmp(direction, "a") == 0 || strcmp(direction, "^[[D") == 0) {
         dy = -1;
     } else if (strcmp(direction, "d") == 0 || strcmp(direction, "^[[C") == 0) {
-        dy = +1;
+        dy = 1;
     } else {
         return;
     }
@@ -588,22 +648,98 @@ void move_player(char* direction, const MapConfig* map_config) {
     if (strcmp(map[new_x][new_y].content, ".") == 0) {
         strcpy(map[x][y].content, ".");
         strcpy(map[new_x][new_y].content, "");
+        redraw_needed = 1;  
     } else if (strcmp(map[new_x][new_y].content, "#") == 0) {
         if (beyond_x >= 0 && beyond_x < lines && beyond_y >= 0 && beyond_y < columns) {
             if (strcmp(map[beyond_x][beyond_y].content, ".") == 0) {
                 strcpy(map[beyond_x][beyond_y].content, "#");
                 strcpy(map[new_x][new_y].content, "");
                 strcpy(map[x][y].content, ".");
+                redraw_needed = 1;  
+            }
+        }
+    }
+}
+
+
+void* enemy_ai_thread(void* arg) {
+    while (game_running) {
+        move_all_enemies();
+        sleep(1); 
+    }
+    return NULL;
+}
+
+void move_all_enemies() {
+    int player_x = -1, player_y = -1;
+
+    for (int i = 0; i < lines; i++) {
+        for (int j = 0; j < columns; j++) {
+            if (strcmp(map[i][j].content, "") == 0) {
+                player_x = i;
+                player_y = j;
+                break;
+            }
+        }
+        if (player_x != -1) break;
+    }
+
+    if (player_x == -1) return;
+
+    typedef struct {
+        int x, y;
+    } EnemyPos;
+
+    EnemyPos enemies[lines * columns];
+    int enemy_count = 0;
+
+    for (int i = 0; i < lines; i++) {
+        for (int j = 0; j < columns; j++) {
+            if (strcmp(map[i][j].content, "󰚌") == 0) {
+                enemies[enemy_count].x = i;
+                enemies[enemy_count].y = j;
+                enemy_count++;
             }
         }
     }
 
-    if (map[new_x][new_y].number > 0) {
-        printf("Você pisou no número %d!\n", map[new_x][new_y].number);
-        map[new_x][new_y].number = 0;  
+    for (int e = 0; e < enemy_count; e++) {
+        int enemy_x = enemies[e].x;
+        int enemy_y = enemies[e].y;
+
+        int dx = 0, dy = 0;
+
+        int diff_x = player_x - enemy_x;
+        int diff_y = player_y - enemy_y;
+
+        if (abs(diff_x) >= abs(diff_y)) {
+            dx = (diff_x > 0) ? 1 : (diff_x < 0) ? -1 : 0;
+        } else {
+            dy = (diff_y > 0) ? 1 : (diff_y < 0) ? -1 : 0;
+        }
+
+        int dirs[4][2] = {
+            {dx, dy},
+            {dx == 0 ? 0 : 0, dy == 0 ? 0 : (dy > 0 ? 1 : -1)},
+            {dx != 0 ? (dx > 0 ? -1 : 1) : 0, 0},
+            {0, dy != 0 ? (dy > 0 ? -1 : 1) : 0}
+        };
+
+        for (int d = 0; d < 4; d++) {
+            int nx = enemy_x + dirs[d][0];
+            int ny = enemy_y + dirs[d][1];
+
+            if (nx >= 0 && nx < lines && ny >= 0 && ny < columns) {
+                if (strcmp(map[nx][ny].content, ".") == 0) {
+                    strcpy(map[enemy_x][enemy_y].content, ".");
+                    strcpy(map[nx][ny].content, "󰚌");
+                    redraw_needed = 1;  
+                    break;
+                }
+            }
+        }
     }
 }
-
 
 void capture_input(char* direction) {
     int c = fgetc(stdin);
