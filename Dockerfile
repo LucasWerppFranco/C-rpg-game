@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-    
+
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
@@ -47,6 +47,10 @@ RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
 
 COPY --from=build /app/main /app/main
 
+COPY --from=build /app/map.txt /app/map.txt
+
+COPY --from=build /app/data.h /app/data.h
+
 COPY --from=build /usr/local/lib/libtusk.so /usr/local/lib/
 RUN ldconfig
 
@@ -57,3 +61,4 @@ ENV TERM=xterm-256color
 WORKDIR /app
 
 CMD ["./main"]
+
