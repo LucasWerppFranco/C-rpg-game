@@ -62,7 +62,7 @@ static const Character player_character = {
     .Weakness = "",
     .conditions = "",
     .immunity_conditions = "",
-    .slots = { "", "", "Longsword" },
+    .slots = { "", "", "" },
     .attacks = {
         { "Assault", "1-2", 0, "Bludgeoning", "", 0, "1d6", 3 },
     },
@@ -97,36 +97,8 @@ static const Character goblin_monster = {
     .abilities = ""
 };
 
-// IRON GOLEM
-static const Character iron_golen_monster = {
-    .name = "Iron Golem",
-    .type = "Construct",
-    .size = 3,
-    .vigor = 10,
-    .strength = 8,
-    .agility = 3,
-    .intelligence = 0,
-    .charisma = 0,
-    .power = 8,
-    .health = 10 + 2 * 10,
-    .armor_class = 3 * 5,
-    .resistances = "Slashing - 10, Piercing - 5",
-    .immunities = "Fire",
-    .Weakness = "Electric",
-    .conditions = "",
-    .immunity_conditions = "",
-    .slots = { "", "", "" },
-    .attacks = {
-        { "Slash", "1-2", 0, "Slashing", "", 0, "1d6", 5 },
-        { "Pierce", "1-2", 0, "Piercing", "", 0, "1d8", 6 },
-        { "Slash (Two-handed)", "3", 0, "Slashing", "", 0, "1d8", 7 },
-        { "Pierce (Two-handed)", "3", 0, "Piercing", "", 0, "1d10", 8 }
-    },
-    .attack_count = 4,
-    .abilities = ""
-};
+// WEAPONS
 
-// WEAPON 
 static const Weapon longsword = {
     .name = "Longsword",
     .type = "Versatile",
@@ -141,5 +113,16 @@ static const Weapon longsword = {
     .attack_count = 4
 };
 
-#endif
+static const Weapon dagger = {
+    .name = "Dagger",
+    .type = "Light",
+    .slot = "1-2",
+    .description = "Small dagger for precise strikes.",
+    .attacks = {
+        { "Quick Slash", "1-2", 1, "Slashing", "", 0, "1d4", 4 },
+        { "Stab", "1-2", 1, "Piercing", "", 0, "1d4", 5 }
+    },
+    .attack_count = 2
+};
 
+#endif
