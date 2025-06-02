@@ -22,8 +22,8 @@
 #define SECONDARY_HEIGHT 4
 
 typedef struct {
-    char content[5]; // Para caracteres até 4 bytes + '\0'
-    int number;      // Usado para armazenar o número, se houver
+    char content[5];
+    int number;
 } Cell;
 
 Cell** map;
@@ -47,12 +47,11 @@ int visual_width(const char *s);
 void print_border_top();
 void print_border_bottom();
 void print_line(const char *text);
+void print_instructions(int current_page);
 void print_box(const char *text);
 void print_title();
 void print_page_header(const char *title);
-void print_story_1();
-void print_story_2();
-void print_story_3();
+void print_story(int n);
 // Map
 void lock_map();
 void clear_memory();
@@ -67,84 +66,62 @@ void capture_input(char* direction);
 
 
 int main() {
-  setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "");
+    setbuf(stdout, NULL); 
 
-  char response[10];
-  set_conio_terminal_mode();
-  print_title();
+    char response[10];
+    set_conio_terminal_mode();
+    print_title();
 
-  print_box("press ENTER to start the game");
-  fgets(response, sizeof(response), stdin);
+    print_box("Press ENTER to start");
+    fgets(response, sizeof(response), stdin);
 
-  if (response[0] == '\n') {
     current_page = 1;
-    char input[10];
-
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 100000 * 1000;
 
     while (1) {
-        if (kbhit()) {
-            char ch = getchar();
-            switch (current_page) {
-                case 1:
-                    print_story_1();
-                    break;
-                case 2:
-                    print_story_2();
-                    break;
-                case 3:
-                    print_story_3();
-                    break;
-                default:
-                    print_box("End of story. Press (A) to go back or (Q) to quit.");
-                    break;
-            }
+        print_story(current_page);
+        print_instructions(current_page);
+        fgets(response, sizeof(response), stdin);
 
-            print_box(" \nPress (D) for next, (A) to return, or (S) to skip:");
-
-            if (ch == 'q' || ch == 'Q') {
-                break; 
-            } else if ((ch == 'd' || ch == 'D') && current_page < 3) {
-                current_page++; 
-            } else if ((ch == 'a' || ch == 'A') && current_page > 1) {
-                current_page--; 
-            } else if (ch == 's' || ch == 'S') {
-                current_page = 1;
-                break; 
-            }
+        if (response[0] == 'q' || response[0] == 'Q') {
+            reset_terminal_mode();
+            return 0;
+        } else if (response[0] == 'a' || response[0] == 'A') {
+            if (current_page > 1) current_page--;
+        } else if (response[0] == 'd' || response[0] == 'D') {
+            if (current_page < 3) current_page++;
+        } else if (response[0] == '\n' && current_page == 3) {
+            break;
         }
-        
-        MapConfig map1 = {
-            .map_name = "Map 1",
-            .intro_text = "Bem-vindo ao Map 1!",
-            .color_code = "yellow",
-            .file_name = "map.txt"
-        };
-
-        load_map(&map1);
-
-        char direction[10];
-        do {
-            system("clear");
-            show_map(&map1);
-            printf("\nComando (w/a/s/d ou setas para mover, q para sair): \n");
-
-            capture_input(direction);
-
-            move_player(direction, &map1);
-        } while (!should_exit(direction[0]));
-
-        print_box(" ");
-
-        clear_memory();
-        nanosleep(&ts, NULL); 
     }
-}
 
-reset_terminal_mode(); 
-return 0;
+    MapConfig map1 = {
+        .map_name = "Map 1",
+        .intro_text = "Catacombs",
+        .color_code = "yellow",
+        .file_name = "map.txt"
+    };
+
+    load_map(&map1);
+
+    char direction[10];
+    do {
+        show_map(&map1);
+        capture_input(direction);
+
+        if (should_exit(direction[0])) {
+            clear_memory();
+            reset_terminal_mode();
+            return 0;
+        }
+
+        move_player(direction, &map1);
+
+    } while (1);
+
+    clear_memory();
+    reset_terminal_mode();
+    return 0;
 }
 
 
@@ -171,31 +148,52 @@ int visual_width(const char *s) {
 
 void print_border_top() {
     printf("╔");
+
     for (int i = 0; i < WIDTH - 2; i++) {
         printf("═");
     }
+
     printf("╗\n");
 }
 
 void print_border_bottom() {
     printf("╚");
+
     for (int i = 0; i < WIDTH - 2; i++) {
         printf("═");
     }
+
     printf("╝\n");
 }
 
 void print_line(const char *text) {
     printf("║");
-    int content_width = visual_width(text);
-    int padding = WIDTH - 2 - content_width;
+
+    int content_width = visual_width(text);  
     printf("%s", text);
+
+    int padding = WIDTH - 2 - content_width;
     for (int j = 0; j < padding; j++) {
         printf(" ");
     }
+
     printf("║\n");
 }
 
+
+void print_instructions(int current_page) {
+    char instrucao[100];
+
+    if (current_page == 3) {
+        snprintf(instrucao, sizeof(instrucao),
+                 "Press ENTER to continue the game\nOr 'A' to return, 'Q' to exit");
+    } else {
+        snprintf(instrucao, sizeof(instrucao),
+                 "Press 'D' to advance\n'A' to return\n'Q' to exit");
+    }
+
+    print_box(instrucao);
+}
 
 void print_box(const char *text) {
     print_border_top();
@@ -289,15 +287,17 @@ void print_page_header(const char *title) {
     print_line("     |/  \\|                                                                                      ");
 }
 
-
-void print_story_1() {
+void print_story(int n) {
     system(CLEAR);
     print_border_top();
 
     print_page_header("STORY");
 
-    const char *text[] = {
-        "                                                                                                  ", 
+    const char **text = NULL;
+    size_t lines = 0;
+
+    static const char *story1[] = {
+        "                                                                                                  ",
         "                                                                                                  ",
         "                                                                                                  ",
         "                                                                                                  ",
@@ -334,25 +334,7 @@ void print_story_1() {
         "                                                                                                  "
     };
 
-    size_t lines = sizeof(text) / sizeof(text[0]);
-    for (size_t i = 0; i < MAIN_HEIGHT - 5; i++) { 
-        if (i < lines) {
-            print_line(text[i]);
-        } else {
-            print_line("");
-        }
-    }
-
-    print_border_bottom();
-}
-
-void print_story_2() {
-    system(CLEAR);
-    print_border_top();
-
-    print_page_header("STORY");
-
-    const char *text[] = {
+    static const char *story2[] = {
       "                                                                                                  ",
       "                                           /|                                                     ",
       "                                          |||                                                     ",
@@ -387,26 +369,10 @@ void print_story_2() {
       "            ( )|'         (~-_|                   (;;'  ;;;~~~/' `;;|  `;;;\\                     ",
       "             ) `\\_         |-_;;--__               ~~~----__/'    /'_______/                     ",
       "             `----'       (   `~--_ ~~~;;------------~~~~~ ;;;'_/'                                ",
-      "                     `~~~~~~~~'~~~-----....___;;;____---~~                                        "     
+      "                     `~~~~~~~~'~~~-----....___;;;____---~~                                        "
     };
 
-    size_t lines = sizeof(text) / sizeof(text[0]);
-    for (size_t i = 0; i < MAIN_HEIGHT -5; i++) {
-        if (i < lines) {
-            print_line(text[i]);
-        } else {
-            print_line("");
-        }
-    }
-    print_border_bottom();
-}
-
-void print_story_3() {
-  system(CLEAR);
-  print_border_top();
-  print_page_header("STORY");
-
-  const char *text[] = {
+    static const char *story3[] = {
     "                                                                                                  ",
     "                    / \\                                                                          ",
     "                   / | \\  Three Rings for the Elvin-Kings under the sky.                         ",
@@ -448,19 +414,39 @@ void print_story_3() {
     "               |\\_/\\/ \\/\\_/|                                                                  ",
     "               |/ \\/\\ /\\/ \\|                                                                  ",
     "                \\_/\\/_\\/\\_/                                                                   ",
-    "                  \\_/_\\_/                                                                       "  
-  };
+    "                  \\_/_\\_/                                                                       "
+    };
 
-size_t lines = sizeof(text) / sizeof(text[0]);
-    for (size_t i = 0; i < MAIN_HEIGHT -5; i++) {
+    switch (n) {
+        case 1:
+            text = story1;
+            lines = sizeof(story1) / sizeof(story1[0]);
+            break;
+        case 2:
+            text = story2;
+            lines = sizeof(story2) / sizeof(story2[0]);
+            break;
+        case 3:
+            text = story3;
+            lines = sizeof(story3) / sizeof(story3[0]);
+            break;
+        default:
+            print_line("Non-existent page");
+            print_border_bottom();
+            return;
+    }
+
+    for (size_t i = 0; i < MAIN_HEIGHT - 5; i++) {
         if (i < lines) {
             print_line(text[i]);
         } else {
             print_line("");
         }
     }
+
     print_border_bottom();
 }
+
 
 
 // MAP
@@ -469,14 +455,14 @@ size_t lines = sizeof(text) / sizeof(text[0]);
 void lock_map() {
     map = malloc(sizeof(Cell*) * lines);
     if (map == NULL) {
-        printf("Error allocate map.\n");
+        printf("Error allocating map.\n");
         exit(1);
     }
 
     for (int i = 0; i < lines; i++) {
         map[i] = malloc(sizeof(Cell) * columns);
         if (map[i] == NULL) {
-            printf("Error allocating line %d.\n", i);
+            printf("Error allocating row %d.\n", i);
             exit(1);
         }
     }
@@ -517,14 +503,14 @@ void load_map(const MapConfig* map_config) {
             }
 
             if (buffer[0] >= '1' && buffer[0] <= '9') {
-                map[i][j].content[0] = '.';  // Exibe "." no lugar do número
-                map[i][j].number = buffer[0] - '0';  // Armazena o número real
+                map[i][j].content[0] = '.';  
+                map[i][j].number = buffer[0] - '0'; 
             } else {
                 strncpy(map[i][j].content, (char*)buffer, 5);
-                map[i][j].number = 0; // Se não for número, armazena 0
+                map[i][j].number = 0; 
             }
         }
-        fgetc(f); // Pula '\n'
+        fgetc(f); 
     }
 
     fclose(f);
@@ -533,23 +519,33 @@ void load_map(const MapConfig* map_config) {
 void show_map(const MapConfig* map_config) {
     system(CLEAR);
     print_border_top();
-    printf("\033[1;37m%s\033[0m\n", map_config->intro_text);  // Texto de introdução com cor padrão
+
+    print_line(map_config->intro_text);
 
     for (int i = 0; i < lines; i++) {
+        printf("║");  // borda esquerda
+
         for (int j = 0; j < columns; j++) {
-            if (strcmp(map_config->color_code, "yellow") == 0) {
-                if (strcmp(map[i][j].content, "@") == 0) {
-                    printf("\033[33m%s\033[0m", map[i][j].content); // Amarelo
-                } else {
-                    printf("%s", map[i][j].content);
-                }
+            if (strcmp(map_config->color_code, "yellow") == 0 && strcmp(map[i][j].content, "@") == 0) {
+                printf("\033[33m%s\033[0m", map[i][j].content);  // imprime com cor
             } else {
                 printf("%s", map[i][j].content);
             }
         }
-        printf("\n");
+
+        int visual_length = columns;  
+        for (int k = visual_length; k < WIDTH - 2; k++) {
+            printf(" ");
+        }
+
+        printf("║\n");  
     }
+
     print_border_bottom();
+
+    print_box("Comands:\n"
+              "w/a/s/d or arrows to move\n"
+              "Q to exit");
 }
 
 int should_exit(char command) {
@@ -561,9 +557,8 @@ void move_player(char* direction, const MapConfig* map_config) {
 
     for (int i = 0; i < lines && x == -1; i++) {
         for (int j = 0; j < columns; j++) {
-            if (strcmp(map[i][j].content, "@") == 0) {
+            if (strcmp(map[i][j].content, "") == 0) {
                 x = i;
-        print_border_bottom();
                 y = j;
                 break;
             }
@@ -572,15 +567,15 @@ void move_player(char* direction, const MapConfig* map_config) {
 
     int dx = 0, dy = 0;
     if (strcmp(direction, "w") == 0 || strcmp(direction, "^[[A") == 0) {
-        dx = -1;  // cima
+        dx = -1;
     } else if (strcmp(direction, "s") == 0 || strcmp(direction, "^[[B") == 0) {
-        dx = +1;  // baixo
+        dx = +1;
     } else if (strcmp(direction, "a") == 0 || strcmp(direction, "^[[D") == 0) {
-        dy = -1;  // esquerda
+        dy = -1;
     } else if (strcmp(direction, "d") == 0 || strcmp(direction, "^[[C") == 0) {
-        dy = +1;  // direita
+        dy = +1;
     } else {
-        return;  // comando inválido
+        return;
     }
 
     int new_x = x + dx;
@@ -592,13 +587,12 @@ void move_player(char* direction, const MapConfig* map_config) {
 
     if (strcmp(map[new_x][new_y].content, ".") == 0) {
         strcpy(map[x][y].content, ".");
-        strcpy(map[new_x][new_y].content, "@");
-    }
-    else if (strcmp(map[new_x][new_y].content, "#") == 0) {
+        strcpy(map[new_x][new_y].content, "");
+    } else if (strcmp(map[new_x][new_y].content, "#") == 0) {
         if (beyond_x >= 0 && beyond_x < lines && beyond_y >= 0 && beyond_y < columns) {
             if (strcmp(map[beyond_x][beyond_y].content, ".") == 0) {
                 strcpy(map[beyond_x][beyond_y].content, "#");
-                strcpy(map[new_x][new_y].content, "@");
+                strcpy(map[new_x][new_y].content, "");
                 strcpy(map[x][y].content, ".");
             }
         }
@@ -606,8 +600,10 @@ void move_player(char* direction, const MapConfig* map_config) {
 
     if (map[new_x][new_y].number > 0) {
         printf("Você pisou no número %d!\n", map[new_x][new_y].number);
+        map[new_x][new_y].number = 0;  
     }
 }
+
 
 void capture_input(char* direction) {
     int c = fgetc(stdin);
