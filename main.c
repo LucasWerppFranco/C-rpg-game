@@ -762,5 +762,3 @@ void capture_input(char* direction) {
 
 
 // COMBAT SYSTEM
-
-
