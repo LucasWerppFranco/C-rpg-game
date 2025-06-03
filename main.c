@@ -665,7 +665,7 @@ void move_player(char* direction, const MapConfig* map_config) {
 void* enemy_ai_thread(void* arg) {
     while (game_running) {
         move_all_enemies();
-        sleep(1); 
+        usleep(500000);
     }
     return NULL;
 }

@@ -23,6 +23,17 @@ typedef struct {
 
 typedef struct {
     char name[20];
+    int defense;
+} Armor;
+
+typedef struct {
+    char name[20];
+    char description[100];
+    int healing;
+} Item;
+
+typedef struct {
+    char name[20];
     char type[20];
     int size;
     int health;
@@ -44,61 +55,7 @@ typedef struct {
     char abilities[100];
 } Character;
 
-// MAIN CHARACTER
-static const Character player_character = {
-    .name = "Hero",
-    .type = "Humanoid",
-    .size = 2,
-    .vigor = 2,
-    .strength = 5,
-    .agility = 3,
-    .intelligence = 4,
-    .charisma = 2,
-    .power = 1,
-    .health = 20 + 2 * 2,  
-    .armor_class = 3 * 5,  
-    .resistances = "",
-    .immunities = "",
-    .Weakness = "",
-    .conditions = "",
-    .immunity_conditions = "",
-    .slots = { "", "", "" },
-    .attacks = {
-        { "Assault", "1-2", 0, "Bludgeoning", "", 0, "1d6", 3 },
-    },
-    .attack_count = 1,
-    .abilities = "Strong Attack"
-};
-
-// GOBLIN
-static const Character goblin_monster = {
-    .name = "Goblin",
-    .type = "Humanoid",
-    .size = 1,
-    .vigor = 2,
-    .strength = 3,
-    .agility = 6,
-    .intelligence = 2,
-    .charisma = 1,
-    .power = 1,
-    .health = 10 + 2 * 2,
-    .armor_class = 6 * 5,
-    .resistances = "",
-    .immunities = "",
-    .Weakness = "",
-    .conditions = "",
-    .immunity_conditions = "",
-    .slots = { "", "", "" },
-    .attacks = {
-        { "Assault", "1-2", 1, "Bludgeoning", "", 0, "1d4", 2 },
-        { "Bite", "1-2", 1, "Piercing", "", 0, "1d6", 3 },
-    },
-    .attack_count = 2,
-    .abilities = ""
-};
-
-// WEAPONS
-
+// ARMAS
 static const Weapon longsword = {
     .name = "Longsword",
     .type = "Versatile",
@@ -125,4 +82,70 @@ static const Weapon dagger = {
     .attack_count = 2
 };
 
+// ARMADURA
+static const Armor leather_armor = {
+    .name = "Leather Armor",
+    .defense = 2
+};
+
+// ITENS
+static const Item healing_potion = {
+    .name = "Potion",
+    .description = "Restores 10 HP.",
+    .healing = 10
+};
+
+// PERSONAGENS
+static const Character player_character = {
+    .name = "Hero",
+    .type = "Humanoid",
+    .size = 2,
+    .vigor = 2,
+    .strength = 5,
+    .agility = 3,
+    .intelligence = 4,
+    .charisma = 2,
+    .power = 1,
+    .health = 24,
+    .armor_class = 15,
+    .resistances = "",
+    .immunities = "",
+    .Weakness = "",
+    .conditions = "",
+    .immunity_conditions = "",
+    .slots = { "", "", "" },
+    .attacks = {
+        { "Assault", "1-2", 0, "Bludgeoning", "", 0, "1d6", 3 }
+    },
+    .attack_count = 1,
+    .abilities = "Strong Attack"
+};
+
+static const Character goblin_monster = {
+    .name = "Goblin",
+    .type = "Humanoid",
+    .size = 1,
+    .vigor = 2,
+    .strength = 3,
+    .agility = 6,
+    .intelligence = 2,
+    .charisma = 1,
+    .power = 1,
+    .health = 14,
+    .armor_class = 30,
+    .resistances = "",
+    .immunities = "",
+    .Weakness = "",
+    .conditions = "",
+    .immunity_conditions = "",
+    .slots = { "", "", "" },
+    .attacks = {
+        { "Assault", "1-2", 1, "Bludgeoning", "", 0, "1d4", 2 },
+        { "Bite", "1-2", 1, "Piercing", "", 0, "1d6", 3 }
+    },
+    .attack_count = 2,
+    .abilities = ""
+};
+
 #endif
+
