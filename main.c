@@ -72,6 +72,8 @@ void* enemy_ai_thread(void* arg);
 void move_all_enemies();
 void capture_input(char* direction);
 
+// Pathfinding - new
+int find_next_step(int start_x, int start_y, int target_x, int target_y, int* next_x, int* next_y);
 
 // Main Functions
 
@@ -418,7 +420,7 @@ void print_story(int n) {
       "         ___       |_     \\__/~-__    ~~   ,'      /,_;,   __--(   _/      |                     ",
       "       //~~\\`\\    /' ~~~----|     ~~~~~~~~'        \\-  ((~~    __-~        |                   ",
       "     ((()   `\\`\\_(_     _-~~-\\                      ``~~ ~~~~~~   \\_      /                   ",
-      "      )))     ~----'   /      \\                                   )       )                      ",
+      "     )))     ~----'   /      \\                                   )       )                      ",
       "       (         ;`~--'        :                                _-    ,;;(                        ",
       "                 |    `\\       |                             _-~    ,;;;;)                       ",
       "                 |    /'`\\     ;                          _-~          _/                        ",
@@ -670,9 +672,104 @@ void* enemy_ai_thread(void* arg) {
     return NULL;
 }
 
+// Breadth-First Search pathfinding para encontrar próximo passo do inimigo até o jogador
+int find_next_step(int start_x, int start_y, int target_x, int target_y, int* next_x, int* next_y) {
+    if (start_x == target_x && start_y == target_y) {
+        *next_x = start_x;
+        *next_y = start_y;
+        return 1;
+    }
+
+    // Estruturas para BFS
+    typedef struct {
+        int x, y;
+    } Point;
+
+    Point queue[lines * columns];
+    int front = 0, back = 0;
+
+    // Matriz para controlar visitados e anterior para reconstruir caminho
+    int (*visited)[columns] = malloc(sizeof(int[lines][columns]));
+    Point (*prev)[columns] = malloc(sizeof(Point[lines][columns]));
+
+    if (!visited || !prev) {
+        if (visited) free(visited);
+        if (prev) free(prev);
+        return 0; // falha na alocação
+    }
+
+    for (int i = 0; i < lines; i++) {
+        for (int j = 0; j < columns; j++) {
+            visited[i][j] = 0;
+            prev[i][j].x = -1;
+            prev[i][j].y = -1;
+        }
+    }
+
+    queue[back++] = (Point){start_x, start_y};
+    visited[start_x][start_y] = 1;
+
+    int dirs[4][2] = {{1,0},{-1,0},{0,1},{0,-1}};
+
+    int found = 0;
+
+    while (front < back && !found) {
+        Point p = queue[front++];
+
+        for (int d = 0; d < 4; d++) {
+            int nx = p.x + dirs[d][0];
+            int ny = p.y + dirs[d][1];
+
+            if (nx >= 0 && nx < lines && ny >= 0 && ny < columns) {
+                if (!visited[nx][ny]) {
+                    // Condição para passar pelas células: só avança se são "livres"
+                    // Considerar "." e símbolos especiais que podem ser atravessáveis
+                    if (strcmp(map[nx][ny].content, ".") == 0 ||
+                        strcmp(map[nx][ny].content, "") == 0) { // inclui jogador
+                        visited[nx][ny] = 1;
+                        prev[nx][ny] = p;
+                        if (nx == target_x && ny == target_y) {
+                            found = 1;
+                            break;
+                        }
+                        queue[back++] = (Point){nx, ny};
+                    }
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        free(visited);
+        free(prev);
+        return 0; // sem caminho encontrado
+    }
+
+    // Reconstruir caminho do destino até início para encontrar o próximo passo
+    Point step = (Point){target_x, target_y};
+    Point before_step;
+
+    while (1) {
+        Point par = prev[step.x][step.y];
+        if (par.x == start_x && par.y == start_y) {
+            before_step = step;
+            break;
+        }
+        step = par;
+    }
+
+    *next_x = before_step.x;
+    *next_y = before_step.y;
+
+    free(visited);
+    free(prev);
+    return 1;
+}
+
 void move_all_enemies() {
     int player_x = -1, player_y = -1;
 
+    // Localiza jogador no mapa
     for (int i = 0; i < lines; i++) {
         for (int j = 0; j < columns; j++) {
             if (strcmp(map[i][j].content, "") == 0) {
@@ -693,6 +790,7 @@ void move_all_enemies() {
     EnemyPos enemies[lines * columns];
     int enemy_count = 0;
 
+    // Localiza inimigos no mapa
     for (int i = 0; i < lines; i++) {
         for (int j = 0; j < columns; j++) {
             if (strcmp(map[i][j].content, "󰚌") == 0) {
@@ -707,37 +805,23 @@ void move_all_enemies() {
         int enemy_x = enemies[e].x;
         int enemy_y = enemies[e].y;
 
-        int dx = 0, dy = 0;
+        int next_x, next_y;
 
-        int diff_x = player_x - enemy_x;
-        int diff_y = player_y - enemy_y;
+        // Usa pathfinding para achar próximo passo em direção ao jogador
+        int path_found = find_next_step(enemy_x, enemy_y, player_x, player_y, &next_x, &next_y);
 
-        if (abs(diff_x) >= abs(diff_y)) {
-            dx = (diff_x > 0) ? 1 : (diff_x < 0) ? -1 : 0;
-        } else {
-            dy = (diff_y > 0) ? 1 : (diff_y < 0) ? -1 : 0;
-        }
-
-        int dirs[4][2] = {
-            {dx, dy},
-            {dx == 0 ? 0 : 0, dy == 0 ? 0 : (dy > 0 ? 1 : -1)},
-            {dx != 0 ? (dx > 0 ? -1 : 1) : 0, 0},
-            {0, dy != 0 ? (dy > 0 ? -1 : 1) : 0}
-        };
-
-        for (int d = 0; d < 4; d++) {
-            int nx = enemy_x + dirs[d][0];
-            int ny = enemy_y + dirs[d][1];
-
-            if (nx >= 0 && nx < lines && ny >= 0 && ny < columns) {
-                if (strcmp(map[nx][ny].content, ".") == 0) {
+        if (path_found) {
+            if (next_x != enemy_x || next_y != enemy_y) {
+                // Verifica se a posição de próximo passo está livre (deve estar, mas por segurança)
+                if (strcmp(map[next_x][next_y].content, ".") == 0 ||
+                    strcmp(map[next_x][next_y].content, "") == 0) {
                     strcpy(map[enemy_x][enemy_y].content, ".");
-                    strcpy(map[nx][ny].content, "󰚌");
-                    redraw_needed = 1;  
-                    break;
+                    strcpy(map[next_x][next_y].content, "󰚌");
+                    redraw_needed = 1;
                 }
             }
         }
+        // Se não encontrou caminho, inimigo não se move
     }
 }
 
@@ -762,3 +846,7 @@ void capture_input(char* direction) {
 
 
 // COMBAT SYSTEM
+
+
+
+
