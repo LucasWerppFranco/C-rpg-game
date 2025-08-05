@@ -94,16 +94,16 @@ int main() {
     while (1) {
         print_story(current_page);
         print_instructions(current_page);
-        fgets(response, sizeof(response), stdin);
+        int ch = getchar();
 
-        if (response[0] == 'q' || response[0] == 'Q') {
+        if (ch == 'q' || ch == 'Q') {
             reset_terminal_mode();
             return 0;
-        } else if (response[0] == 'a' || response[0] == 'A') {
+        } else if (ch == 'a' || ch == 'A') {
             if (current_page > 1) current_page--;
-        } else if (response[0] == 'd' || response[0] == 'D') {
+        } else if (ch == 'd' || ch == 'D') {
             if (current_page < 3) current_page++;
-        } else if (response[0] == '\n' && current_page == 3) {
+        } else if ((ch == '\n' || ch == '\r') && current_page == 3) {
             break;
         }
     }
