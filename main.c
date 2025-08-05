@@ -321,7 +321,7 @@ void print_title() {
         "                                                                                                  ",
         "   From -> Lucas Werpp Franco                                      Thanks for playing my game :)  ",
         "                                                                                                  ",
-        "                  https://github.com/LucasWerppFranco/C-rpg-game/tree/main                        "
+        "                       https://github.com/LucasWerppFranco/C-rpg-game                             "
     };
 
     size_t lines = sizeof(text) / sizeof(text[0]);
