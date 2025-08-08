@@ -1,4 +1,4 @@
-Dagger (Arma): 2
-Longsword (Arma): 4
-Potion (Item): 1
+Dagger (Arma): 1
+Longsword (Arma): 3
+Potion (Item): 8
 Leather Armor (Armadura): 1

@@ -603,9 +603,9 @@ void show_map(const MapConfig* map_config) {
 
     print_border_bottom();
 
-    print_box("Comandos:\n"
-              "w/a/s/d ou setas para mover\n"
-              "q para sair");
+    print_box("Commands:\n"
+              "w/a/s/d or arows to move\n"
+              "'q' to exit");
 }
 
 int should_exit(char command) {
@@ -672,7 +672,6 @@ void* enemy_ai_thread(void* arg) {
     return NULL;
 }
 
-// Breadth-First Search pathfinding para encontrar próximo passo do inimigo até o jogador
 int find_next_step(int start_x, int start_y, int target_x, int target_y, int* next_x, int* next_y) {
     if (start_x == target_x && start_y == target_y) {
         *next_x = start_x;
@@ -680,7 +679,6 @@ int find_next_step(int start_x, int start_y, int target_x, int target_y, int* ne
         return 1;
     }
 
-    // Estruturas para BFS
     typedef struct {
         int x, y;
     } Point;
@@ -688,14 +686,13 @@ int find_next_step(int start_x, int start_y, int target_x, int target_y, int* ne
     Point queue[lines * columns];
     int front = 0, back = 0;
 
-    // Matriz para controlar visitados e anterior para reconstruir caminho
     int (*visited)[columns] = malloc(sizeof(int[lines][columns]));
     Point (*prev)[columns] = malloc(sizeof(Point[lines][columns]));
 
     if (!visited || !prev) {
         if (visited) free(visited);
         if (prev) free(prev);
-        return 0; // falha na alocação
+        return 0; 
     }
 
     for (int i = 0; i < lines; i++) {
@@ -722,10 +719,8 @@ int find_next_step(int start_x, int start_y, int target_x, int target_y, int* ne
 
             if (nx >= 0 && nx < lines && ny >= 0 && ny < columns) {
                 if (!visited[nx][ny]) {
-                    // Condição para passar pelas células: só avança se são "livres"
-                    // Considerar "." e símbolos especiais que podem ser atravessáveis
                     if (strcmp(map[nx][ny].content, ".") == 0 ||
-                        strcmp(map[nx][ny].content, "") == 0) { // inclui jogador
+                        strcmp(map[nx][ny].content, "") == 0) { 
                         visited[nx][ny] = 1;
                         prev[nx][ny] = p;
                         if (nx == target_x && ny == target_y) {
@@ -742,10 +737,9 @@ int find_next_step(int start_x, int start_y, int target_x, int target_y, int* ne
     if (!found) {
         free(visited);
         free(prev);
-        return 0; // sem caminho encontrado
+        return 0; 
     }
 
-    // Reconstruir caminho do destino até início para encontrar o próximo passo
     Point step = (Point){target_x, target_y};
     Point before_step;
 
@@ -769,7 +763,6 @@ int find_next_step(int start_x, int start_y, int target_x, int target_y, int* ne
 void move_all_enemies() {
     int player_x = -1, player_y = -1;
 
-    // Localiza jogador no mapa
     for (int i = 0; i < lines; i++) {
         for (int j = 0; j < columns; j++) {
             if (strcmp(map[i][j].content, "") == 0) {
@@ -790,7 +783,6 @@ void move_all_enemies() {
     EnemyPos enemies[lines * columns];
     int enemy_count = 0;
 
-    // Localiza inimigos no mapa
     for (int i = 0; i < lines; i++) {
         for (int j = 0; j < columns; j++) {
             if (strcmp(map[i][j].content, "󰚌") == 0) {
@@ -807,12 +799,10 @@ void move_all_enemies() {
 
         int next_x, next_y;
 
-        // Usa pathfinding para achar próximo passo em direção ao jogador
         int path_found = find_next_step(enemy_x, enemy_y, player_x, player_y, &next_x, &next_y);
 
         if (path_found) {
             if (next_x != enemy_x || next_y != enemy_y) {
-                // Verifica se a posição de próximo passo está livre (deve estar, mas por segurança)
                 if (strcmp(map[next_x][next_y].content, ".") == 0 ||
                     strcmp(map[next_x][next_y].content, "") == 0) {
                     strcpy(map[enemy_x][enemy_y].content, ".");
@@ -821,7 +811,6 @@ void move_all_enemies() {
                 }
             }
         }
-        // Se não encontrou caminho, inimigo não se move
     }
 }
 
