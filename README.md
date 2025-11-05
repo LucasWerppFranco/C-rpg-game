@@ -24,7 +24,7 @@ This repository was created with the intention of improving my knowledge in C. F
 ---
 
 ## Libraries used
-I created some libraries with the intention of not only adding to my project but also helping other Gnu/Lunux developers to carry out their projects. Feel free to check them out.
+I created some libraries with the intention of not only adding to my project but also helping other Gnu/Linux developers to carry out their projects. Feel free to check them out.
 
 - [Tusk](https://github.com/LucasWerppFranco/Tusk-C-library)
 
